@@ -102,21 +102,126 @@ const cashier = {
 
     checkout() {
         if (!this.currentOrder) return;
-
+        
         const finalTotal = this.currentOrder.finalTotal || this.currentOrder.total;
+        
+        const bodyHtml = `
+            <div class="space-y-4">
+                <p>مبلغ قابل پرداخت: <strong>${finalTotal.toLocaleString()} تومان</strong></p>
+                <div class="flex gap-4 border-b pb-4">
+                    <button onclick="cashier.processNormalCheckout()" class="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700">پرداخت نقدی/کارت</button>
+                    <button onclick="cashier.showHotelChargeForm()" class="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">انتقال به حساب هتل</button>
+                </div>
+                <div id="hotel-charge-form" class="hidden-view space-y-3 pt-2">
+                    <div>
+                        <label class="block text-sm mb-1">کد کاربری ۶ رقمی مهمان</label>
+                        <input type="text" id="hc-usercode" class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">شماره اتاق</label>
+                        <input type="text" id="hc-room" class="w-full p-2 border rounded">
+                    </div>
+                    <button onclick="cashier.processHotelCheckout()" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 mt-2">ثبت در سیستم هتل</button>
+                </div>
+            </div>
+        `;
+        
+        app.openModal('انتخاب روش تسویه', bodyHtml, '<button onclick="app.closeModal()" class="px-4 py-2 border rounded">انصراف</button>');
+    },
 
+    showHotelChargeForm() {
+        document.getElementById('hotel-charge-form').classList.remove('hidden-view');
+    },
+
+    processNormalCheckout() {
+        if (!this.currentOrder) return;
+        const finalTotal = this.currentOrder.finalTotal || this.currentOrder.total;
+        this.finalizeOrder(finalTotal);
+        app.closeModal();
+    },
+
+    processHotelCheckout() {
+        if (!this.currentOrder) return;
+        const finalTotal = this.currentOrder.finalTotal || this.currentOrder.total;
+        
+        const code = document.getElementById('hc-usercode').value.trim();
+        const roomNum = document.getElementById('hc-room').value.trim();
+        
+        if(!code || !roomNum) {
+            alert('لطفا کد کاربری و شماره اتاق را وارد کنید.');
+            return;
+        }
+
+        const storedHotel = localStorage.getItem('hotelDB4');
+        if(!storedHotel) {
+            alert('دیتابیس هتل یافت نشد! آیا هتل در همین مرورگر اجرا شده است؟');
+            return;
+        }
+        
+        let hotelDB = JSON.parse(storedHotel);
+        
+        const u = hotelDB.users.find(x => x.userCode === code);
+        if(!u) return alert('کد کاربری یافت نشد.');
+        
+        const r = hotelDB.rooms.find(x => x.number === roomNum);
+        if(!r) return alert('شماره اتاق یافت نشد.');
+        
+        const b = hotelDB.bookings.find(x => x.guestId === u.id && x.roomId === r.id && x.status === 'active');
+        if(!b) return alert('اقامت فعالی برای این کاربر در این اتاق یافت نشد.');
+
+        let isPaid = false;
+        
+        const now = new Date();
+        const j = jalaali.toJalaali(now);
+        const m = j.jm < 10 ? '0' + j.jm : j.jm;
+        const dy = j.jd < 10 ? '0' + j.jd : j.jd;
+        const dateStr = `${j.jy}/${m}/${dy}`;
+        const timeStr = now.toTimeString().split(' ')[0];
+        
+        if(u.wallet >= finalTotal) {
+            u.wallet -= finalTotal;
+            const newTxId = hotelDB.transactions.length > 0 ? Math.max(...hotelDB.transactions.map(x => x.id)) + 1 : 1;
+            hotelDB.transactions.push({ 
+                id: newTxId, userId: u.id, amount: -finalTotal, 
+                type: 'کسر', desc: 'سفارش رستوران (اتصال مستقیم)', method: 'سیستم', 
+                date: dateStr + ' ' + timeStr
+            });
+            isPaid = true;
+        }
+
+        const newOrderId = hotelDB.restaurantOrders.length > 0 ? Math.max(...hotelDB.restaurantOrders.map(x => x.id)) + 1 : 1;
+        
+        hotelDB.restaurantOrders.push({ 
+            id: newOrderId, userId: u.id, bookingId: b.id, 
+            trackingCode: this.currentOrder.id.toString(), 
+            amount: finalTotal, date: dateStr, isPaid: isPaid 
+        });
+        
+        localStorage.setItem('hotelDB4', JSON.stringify(hotelDB));
+        
+        alert(isPaid ? 'مبلغ سفارش از کیف پول هتل کاربر کسر شد و پرداخت شد.' : 'موجودی هتل کافی نبود. مبلغ در بدهی اتاق ثبت شد.');
+        
+        this.finalizeOrder(finalTotal);
+        app.closeModal();
+    },
+
+    finalizeOrder(finalTotal) {
         let orders = store.getData('orders');
         const orderIndex = orders.findIndex(o => o.id === this.currentOrder.id);
-        orders[orderIndex].status = 'paid';
-        orders[orderIndex].finalPaid = finalTotal;
-        store.setData('orders', orders);
+        if (orderIndex > -1) {
+            orders[orderIndex].status = 'paid';
+            orders[orderIndex].finalPaid = finalTotal;
+            store.setData('orders', orders);
+        }
 
         let tables = store.getData('tables');
         const tableIndex = tables.findIndex(t => t.id === this.currentOrder.tableId);
-        tables[tableIndex].status = 'free';
-        store.setData('tables', tables);
+        if (tableIndex > -1) {
+            tables[tableIndex].status = 'free';
+            store.setData('tables', tables);
+        }
 
-        let sales = parseInt(localStorage.getItem('restaurant_sales'));
+        let sales = parseInt(localStorage.getItem('restaurant_sales') || '0');
         sales += finalTotal;
         localStorage.setItem('restaurant_sales', sales.toString());
 
