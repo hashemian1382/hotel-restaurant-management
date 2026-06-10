@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد - هتل پارادایس</title>
+    <link rel="stylesheet" href="vazirmatn/Vazirmatn-font-face.css">
+    <link rel="stylesheet" href="css/shared.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/kamadatepicker.min.css">
+</head>
+<body>
+    <div id="app-view">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <span class="logo-icon">✨</span>
+                    <h2>هتل پارادایس</h2>
+                </div>
+            </div>
+            <ul class="sidebar-menu" id="sidebar-menu"></ul>
+            <div class="sidebar-footer">
+                <button class="outline logout-btn" onclick="logout()">خروج از حساب</button>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="topbar">
+                <div class="page-title-wrapper">
+                    <h2 id="page-title">داشبورد</h2>
+                </div>
+                <div class="user-info">
+                    <div id="wallet-balance" style="display: none;"></div>
+                    <div class="user-details">
+                        <div class="user-name" id="current-user-name"></div>
+                        <div class="user-role" id="current-user-role"></div>
+                    </div>
+                    <div class="avatar" id="current-user-avatar"></div>
+                </div>
+            </div>
+            <div id="dynamic-content"></div>
+        </main>
+    </div>
+
+    <div class="modal" id="main-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">عنوان</h2>
+                <span class="close-modal" onclick="closeModal()">×</span>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jalaali.js"></script>
+    <script src="js/kamadatepicker.min.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/modules/guest.js"></script>
+    <script src="js/modules/reception.js"></script>
+    <script src="js/modules/restaurant.js"></script>
+    <script src="js/modules/parking.js"></script>
+    <script src="js/modules/amenity.js"></script>
+    <script src="js/modules/service.js"></script>
+    <script src="js/modules/manager.js"></script>
+</body>
+</html>

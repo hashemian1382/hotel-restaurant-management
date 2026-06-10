@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود به سیستم مدیریت هتل</title>
+    <link rel="stylesheet" href="vazirmatn/Vazirmatn-font-face.css">
+    <link rel="stylesheet" href="css/shared.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+    <div id="auth-view">
+        <div class="auth-wrapper">
+            <div class="card auth-box">
+                <div class="auth-header">
+                    <div class="auth-icon">🏨</div>
+                    <h2 id="auth-title">ورود به سامانه هتل</h2>
+                    <p class="auth-subtitle">جهت دسترسی به پنل مدیریت، وارد شوید</p>
+                </div>
+                <form id="auth-form" onsubmit="handleAuth(event)">
+                    <div id="register-fields" class="hidden">
+                        <div class="form-group">
+                            <label>نام و نام خانوادگی</label>
+                            <input type="text" id="reg-name" placeholder="مثال: علی محمدی">
+                        </div>
+                        <div class="form-group">
+                            <label>شماره تماس</label>
+                            <input type="text" id="reg-phone" placeholder="09123456789">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>نام کاربری</label>
+                        <input type="text" id="auth-user" required placeholder="نام کاربری خود را وارد کنید">
+                    </div>
+                    <div class="form-group">
+                        <label>رمز عبور</label>
+                        <input type="password" id="auth-pass" required placeholder="رمز عبور خود را وارد کنید">
+                    </div>
+                    <button type="submit" id="auth-btn" class="auth-submit">ورود به سیستم</button>
+                    <p class="auth-switch">
+                        کاربر جدید هستید؟ <a href="#" onclick="toggleAuthMode()">ثبت نام مهمان جدید</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

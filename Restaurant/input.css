@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+  @font-face {
+    font-family: 'Vazirmatn';
+    src: url('./fonts/Vazirmatn-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  html {
+    font-family: 'Vazirmatn', system-ui, sans-serif;
+    direction: rtl;
+  }
+}
+
+@layer components {
+
+  .order-card {
+    @apply border-2 border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all;
+  }
+  
+
+  .btn-primary {
+    @apply bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 active:scale-95 transition-all;
+  }
+}
+
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
